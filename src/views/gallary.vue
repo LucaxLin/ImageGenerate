@@ -1,7 +1,5 @@
 <template>
-  <div class="home">
-    <HelloWorld></HelloWorld>
-  </div>
+  <div class="gallary">111</div>
 </template>
 <script setup></script>
 <style scoped lang="scss"></style>
