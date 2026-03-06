@@ -12,6 +12,7 @@ export default () => {
       UnoCss(),
       AutoImport({
         imports: ['vue'],
+        resolvers: [ElementPlusResolver()],
         dts: 'src/types/auto-imports.d.ts',
         eslintrc: {
           enabled: true // 是否自动修复
