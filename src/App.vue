@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDark, useMediaQuery } from '@vueuse/core'
-
+import { Analytics } from '@vercel/analytics/vue'
 const isDark = useDark()
 const isDesktop = useMediaQuery('(min-width: 769px)')
 const isMobile = computed(() => !isDesktop.value)
@@ -16,6 +16,7 @@ provide('settingsVisible', settingsVisible)
 </script>
 
 <template>
+  <Analytics />
   <div hfull flex="~ col justify-center items-center">
     <div class="top" wfull p-8 flex="~ justify-between items-center">
       <div class="logo-container" flex="~ items-center" flex-1 md:flex-none>
