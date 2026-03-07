@@ -11,8 +11,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BotConfig: typeof import('./../components/BotConfig.vue')['default']
+    BotConfigComponent: typeof import('./../components/BotConfigComponent.vue')['default']
+    ChatHistory: typeof import('./../components/ChatHistory.vue')['default']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
@@ -23,6 +28,7 @@ declare module 'vue' {
     ElSplitterPanel: typeof import('element-plus/es')['ElSplitterPanel']
     ElTextarea: typeof import('element-plus/es')['ElTextarea']
     HelloWorld: typeof import('./../components/HelloWorld.vue')['default']
+    PromptInput: typeof import('./../components/PromptInput.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ToggleDark: typeof import('./../components/toggleDark.vue')['default']

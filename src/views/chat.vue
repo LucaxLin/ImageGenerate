@@ -1,114 +1,73 @@
 <template>
-  <div class="chat">
-    <el-splitter>
-      <el-splitter-panel size="30%" min="30%">
-        <div class="bot-config" p16>
-          <el-form
-            label-position="right"
-            :model="botConfig"
-            label-width="auto"
-            @submit.prevent
-          >
-            <el-form-item label="模型">
-              <el-select v-model="botConfig.model">
-                <el-option
-                  v-for="item in modelOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option
-              ></el-select>
-            </el-form-item>
-            <el-form-item label="种子">
-              <div class="value" flex="~ items-center" wfull>
-                <el-input-number
-                  class="flex-1"
-                  v-model="botConfig.seed"
-                  :min="0"
-                  :max="9999999999"
-                />
-                <span
-                  ml16
-                  text-20
-                  i-material-symbols-refresh-rounded
-                  transition-all-100
-                  cursor-pointer
-                  hover:color-primary
-                  @click="generateRandomSeed"
-                ></span>
-              </div>
-            </el-form-item>
-            <el-form-item label="API秘钥">
-              <el-input v-model="token"></el-input>
-            </el-form-item>
-          </el-form>
-        </div>
+  <div class="chat" h-screen w-screen overflow-hidden>
+    <el-splitter :direction="isMobile ? 'vertical' : 'horizontal'">
+      <!-- 左侧配置面板 -->
+      <el-splitter-panel
+        :size="isMobile ? 0 : '30%'"
+        :min="isMobile ? 0 : '30%'"
+        v-if="!isMobile"
+      >
+        <BotConfigComponent
+          v-model="botConfig"
+          v-model:token="token"
+          :is-mobile="isMobile"
+          @update:modelValue="updateBotConfig"
+        />
       </el-splitter-panel>
+
+      <!-- 右侧主内容区 -->
       <el-splitter-panel>
         <div class="chat-dialog" hfull p16 flex="~ col gap16">
-          <div
-            class="chatting-history"
-            flex-1
-            p16
-            overflow-y-auto
-            b="solid 1 [--el-border-color-light] rd-3xl"
-            v-loading="loading"
-          >
-            <el-image
-              v-for="(url, index) in resultImgs"
-              style="width: 30vw; margin: 0 16px 16px 0"
-              :src="url"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="resultImgs"
-              show-progress
-              :initial-index="index"
-              fit="cover"
-            />
-          </div>
-          <div
-            class="prompt h-[15vh]"
-            b="solid 1 [--el-border-color-light] rd-3xl"
-            relative
-          >
-            <el-input
-              pr15
-              v-model="botConfig.prompt"
-              placeholder="请输入关键词"
-              :rows="5"
-              resize="none"
-              type="textarea"
-            />
-            <span
-              i-ri-send-plane-fill
-              transition-all-100
-              cursor-pointer
-              hover:color-primary
-              absolute
-              bottom-5
-              right-15
-              size-30
-              @click="generateImage"
-            ></span>
-          </div>
+          <ChatHistory :images="resultImgs" :loading="loading" />
+          <PromptInput
+            v-model="botConfig.prompt"
+            :is-mobile="isMobile"
+            @send="generateImage"
+          />
         </div>
       </el-splitter-panel>
     </el-splitter>
+
+    <!-- 手机端设置抽屉 -->
+    <el-drawer
+      v-model="settingsVisible"
+      title="设置"
+      :size="isMobile ? '80%' : '400px'"
+      direction="rtl"
+    >
+      <BotConfigComponent
+        v-model="botConfig"
+        v-model:token="token"
+        @update:modelValue="updateBotConfig"
+        :is-mobile="true"
+      />
+    </el-drawer>
   </div>
 </template>
+
 <script setup lang="ts">
 import axios from 'axios'
-const modelOptions = [
-  {
-    label: 'Qwen/Qwen-Image',
-    value: 'Qwen/Qwen-Image'
-  },
-  {
-    label: 'Kolors',
-    value: 'Kwai-Kolors/Kolors'
-  }
-]
+
+// 响应式检测设备类型
+const isMobile = ref(false)
+
+// 检测屏幕宽度
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+// 从父组件注入设置抽屉的显示状态
+const settingsVisible = inject<Ref<boolean>>('settingsVisible', ref(false))
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
+
 const botConfig = reactive({
   model: 'Qwen/Qwen-Image',
   num_inference_steps: 20,
@@ -116,14 +75,24 @@ const botConfig = reactive({
   seed: 0,
   prompt: ''
 })
-const token = ref('')
-function generateRandomSeed() {
-  const min = 0
-  const max = 9999999999
-  botConfig.seed = Math.floor(Math.random() * (max - min + 1)) + min
+function updateBotConfig(e: {
+  model: string
+  num_inference_steps: number
+  guidance_scale: number
+  seed: number
+  prompt: string
+}) {
+  botConfig.model = e.model
+  botConfig.num_inference_steps = e.num_inference_steps
+  botConfig.guidance_scale = e.guidance_scale
+  botConfig.seed = e.seed
+  botConfig.prompt = e.prompt
 }
-const resultImgs = ref([])
+
+const token = ref('')
+const resultImgs = ref<string[]>([])
 const loading = ref(false)
+
 function generateImage() {
   loading.value = true
   axios
@@ -143,4 +112,5 @@ function generateImage() {
     })
 }
 </script>
+
 <style scoped lang="scss"></style>
